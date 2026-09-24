@@ -1,0 +1,17 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Executables & Compiled Binaries
+*.exe
+*.out
+*.app
+*.class
+
+# OS / Editor generated
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
