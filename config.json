@@ -1,0 +1,19 @@
+{
+  "project_name": "Antigravity Universal Assignment Solver Engine",
+  "version": "2.0.0",
+  "theme": "light_mode",
+  "default_font": "Consolas",
+  "font_size": 10.5,
+  "line_spacing": 1.15,
+  "strip_comments": true,
+  "page_break_after_original": true,
+  "screenshot": {
+    "width_inches": 5.8,
+    "theme": "cmd_light",
+    "font_size": 15,
+    "line_height": 24,
+    "padding_x": 25,
+    "padding_y": 18
+  },
+  "supported_extensions": [".py", ".java", ".cpp", ".c", ".js", ".cs", ".go", ".rs"]
+}

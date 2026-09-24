@@ -1,10 +1,11 @@
 """
-Universal Automated Academic Assignment Solver Protocol
-Developed for Antigravity AI & Autonomous Coding Workflows
+Antigravity Universal Academic Assignment Solver Engine v2.0
+Multi-Language, Multi-Theme, Zero-Box Formatting Pipeline
 """
 
 import os
 import glob
+import json
 import re
 import subprocess
 import sys
@@ -16,7 +17,53 @@ from PIL import Image, ImageDraw, ImageFont
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 
-def render_light_terminal(command_line, output_text, output_png_path, title_str="Command Prompt - Execution"):
+# Theme Palette Specifications
+THEMES = {
+    "cmd_light": {
+        "bg": "#FFFFFF",
+        "title_bg": "#F0F3F6",
+        "title_text": "#2C3E50",
+        "border": "#CFD6DD",
+        "prompt_text": "#004085",
+        "output_text": "#111111"
+    },
+    "powershell_light": {
+        "bg": "#F4F7FB",
+        "title_bg": "#E2E8F0",
+        "title_text": "#1E293B",
+        "border": "#CBD5E1",
+        "prompt_text": "#0284C7",
+        "output_text": "#0F172A"
+    },
+    "macos_light": {
+        "bg": "#FFFFFF",
+        "title_bg": "#E9EAEB",
+        "title_text": "#4A4A4A",
+        "border": "#D1D5DB",
+        "prompt_text": "#0D6EFD",
+        "output_text": "#212529"
+    }
+}
+
+def load_config():
+    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+    if os.path.exists(config_path):
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {
+        "theme": "cmd_light",
+        "font_size": 10.5,
+        "line_spacing": 1.15,
+        "strip_comments": True,
+        "screenshot": {"width_inches": 5.8}
+    }
+
+def render_styled_terminal(command_line, output_text, output_png_path, title_str="Command Prompt - Execution", theme_name="cmd_light"):
+    theme = THEMES.get(theme_name, THEMES["cmd_light"])
+    
     font_path = "C:/Windows/Fonts/consola.ttf"
     font_bold_path = "C:/Windows/Fonts/consolab.ttf"
     header_font_path = "C:/Windows/Fonts/segoeui.ttf"
@@ -39,36 +86,36 @@ def render_light_terminal(command_line, output_text, output_png_path, title_str=
     
     img_height = title_bar_height + padding_y * 2 + len(lines) * line_height + 12
     
-    img = Image.new('RGB', (img_width, img_height), color='#FFFFFF')
+    img = Image.new('RGB', (img_width, img_height), color=theme["bg"])
     draw = ImageDraw.Draw(img)
     
-    # Windows Titlebar Styling
-    draw.rectangle([0, 0, img_width - 1, title_bar_height], fill='#F0F3F6', outline='#CFD6DD')
-    draw.text((16, 11), title_str, fill='#2C3E50', font=header_font)
+    # Titlebar
+    draw.rectangle([0, 0, img_width - 1, title_bar_height], fill=theme["title_bg"], outline=theme["border"])
+    draw.text((16, 11), title_str, fill=theme["title_text"], font=header_font)
     
-    # Action Buttons (Close, Maximize, Minimize)
+    # Window Buttons (Close, Maximize, Minimize)
     btn_w = 46
     draw.rectangle([img_width - btn_w, 0, img_width - 1, title_bar_height], fill='#E81123')
     draw.line([(img_width - btn_w + 18, 14), (img_width - btn_w + 28, 24)], fill='#FFFFFF', width=1)
     draw.line([(img_width - btn_w + 18, 24), (img_width - btn_w + 28, 14)], fill='#FFFFFF', width=1)
     
-    draw.rectangle([img_width - btn_w*2, 0, img_width - btn_w - 1, title_bar_height], fill='#F0F3F6')
+    draw.rectangle([img_width - btn_w*2, 0, img_width - btn_w - 1, title_bar_height], fill=theme["title_bg"])
     draw.rectangle([img_width - btn_w*2 + 18, 14, img_width - btn_w*2 + 28, 24], outline='#333333', width=1)
     
-    draw.rectangle([img_width - btn_w*3, 0, img_width - btn_w*2 - 1, title_bar_height], fill='#F0F3F6')
+    draw.rectangle([img_width - btn_w*3, 0, img_width - btn_w*2 - 1, title_bar_height], fill=theme["title_bg"])
     draw.line([(img_width - btn_w*3 + 18, 19), (img_width - btn_w*3 + 28, 19)], fill='#333333', width=1)
     
-    # Outer Border
-    draw.rectangle([0, title_bar_height, img_width - 1, img_height - 1], outline='#CFD6DD', width=1)
-    draw.rectangle([1, title_bar_height + 1, img_width - 2, img_height - 2], fill='#FFFFFF')
+    # Outer Border & Content Area
+    draw.rectangle([0, title_bar_height, img_width - 1, img_height - 1], outline=theme["border"], width=1)
+    draw.rectangle([1, title_bar_height + 1, img_width - 2, img_height - 2], fill=theme["bg"])
     
-    # Terminal Lines
+    # Draw Lines
     y = title_bar_height + padding_y
-    draw.text((padding_x, y), command_line, fill='#004085', font=font_bold)
+    draw.text((padding_x, y), command_line, fill=theme["prompt_text"], font=font_bold)
     y += line_height
     
     for line in output_text.split('\n'):
-        draw.text((padding_x, y), line, fill='#111111', font=font)
+        draw.text((padding_x, y), line, fill=theme["output_text"], font=font)
         y += line_height
         
     img.save(output_png_path, "PNG")
@@ -127,6 +174,7 @@ def run_code_file(filepath):
         return cmd_prompt, res.stdout.strip()
 
 def process_assignment():
+    cfg = load_config()
     workspace_root = os.path.dirname(os.path.abspath(__file__))
     raw_dir = os.path.join(workspace_root, "raw_file")
     workspace_dir = os.path.join(workspace_root, "workspace")
@@ -145,8 +193,9 @@ def process_assignment():
     output_docx_path = os.path.join(output_dir, filename)
     
     print("=" * 60)
-    print("[+] ANTIGRAVITY AUTOMATED ASSIGNMENT SOLVER PIPELINE")
-    print(f"Target Assignment Document: {filename}")
+    print(f"[+] {cfg.get('project_name', 'ANTIGRAVITY ASSIGNMENT SOLVER')}")
+    print(f"    Version: {cfg.get('version', '2.0.0')}")
+    print(f"    Target File: {filename}")
     print("=" * 60)
     
     code_files = sorted(glob.glob(os.path.join(workspace_dir, "Problem*.*")))
@@ -161,11 +210,11 @@ def process_assignment():
         basename = os.path.splitext(os.path.basename(code_file))[0]
         ext = os.path.splitext(code_file)[1].lower()
         
-        print(f"[+] Executing & capturing screenshot for: {os.path.basename(code_file)}")
+        print(f"[+] Executing & rendering screenshot: {os.path.basename(code_file)}")
         cmd_str, out_text = run_code_file(code_file)
         
         png_path = os.path.join(workspace_dir, f"{basename}_output.png")
-        render_light_terminal(cmd_str, out_text, png_path, title_str=f"Command Prompt - {os.path.basename(code_file)}")
+        render_styled_terminal(cmd_str, out_text, png_path, title_str=f"Command Prompt - {os.path.basename(code_file)}", theme_name=cfg.get("theme", "cmd_light"))
         
         prob_data.append({
             "num": idx,
@@ -176,7 +225,8 @@ def process_assignment():
         
     print("[+] Appending solution sections to document...")
     doc = Document(raw_docx_path)
-    doc.add_page_break()
+    if cfg.get("page_break_after_original", True):
+        doc.add_page_break()
     
     for item in prob_data:
         code_file = item["code_file"]
@@ -196,7 +246,7 @@ def process_assignment():
         with open(code_file, "r", encoding="utf-8") as f:
             raw_code = f.read()
             
-        clean_code = strip_code_comments(raw_code, ext)
+        clean_code = strip_code_comments(raw_code, ext) if cfg.get("strip_comments", True) else raw_code
         code_lines = clean_code.strip().split('\n')
         
         # Format Code as PLAIN PARAGRAPHS (NO BOXES / NO TABLES)
@@ -204,10 +254,10 @@ def process_assignment():
             p = doc.add_paragraph()
             p.paragraph_format.space_before = Pt(0)
             p.paragraph_format.space_after = Pt(0)
-            p.paragraph_format.line_spacing = 1.15
+            p.paragraph_format.line_spacing = cfg.get("line_spacing", 1.15)
             run = p.add_run(line if line else " ")
-            run.font.name = 'Consolas'
-            run.font.size = Pt(10.5)
+            run.font.name = cfg.get("default_font", "Consolas")
+            run.font.size = Pt(cfg.get("font_size", 10.5))
             run.font.color.rgb = RGBColor(0, 0, 0)
             
         # Output Heading
@@ -224,7 +274,8 @@ def process_assignment():
         p_img.paragraph_format.space_before = Pt(4)
         p_img.paragraph_format.space_after = Pt(14)
         r_img = p_img.add_run()
-        r_img.add_picture(png_path, width=Inches(5.8))
+        width_inches = cfg.get("screenshot", {}).get("width_inches", 5.8)
+        r_img.add_picture(png_path, width=Inches(width_inches))
         
     try:
         doc.save(output_docx_path)
