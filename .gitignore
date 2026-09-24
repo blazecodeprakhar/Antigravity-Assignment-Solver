@@ -4,6 +4,10 @@ __pycache__/
 *.pyo
 *.pyd
 
+# Temporary Word Lock & Fallback Files
+~$*.docx
+final_output/solved_*.docx
+
 # Executables & Compiled Binaries
 *.exe
 *.out
